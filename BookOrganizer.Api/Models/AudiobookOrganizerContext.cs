@@ -13,7 +13,6 @@ public partial class AudiobookOrganizerContext : DbContext
     public AudiobookOrganizerContext(DbContextOptions<AudiobookOrganizerContext> options)
         : base(options)
     {
-        
     }
 
     public virtual DbSet<Author> Authors { get; set; }
@@ -66,22 +65,11 @@ public partial class AudiobookOrganizerContext : DbContext
             entity.Property(e => e.OpenLibraryWorksLink)
                 .HasMaxLength(18)
                 .IsFixedLength();
-            entity.Property(e => e.Publisher)
-                .HasMaxLength(10)
-                .IsFixedLength();
         });
 
         modelBuilder.Entity<BookPath>(entity =>
         {
             entity.HasKey(e => e.PathId);
-
-            entity.HasOne(d => d.Author).WithMany(p => p.BookPaths)
-                .HasForeignKey(d => d.AuthorId)
-                .HasConstraintName("FK_AuthorsBookPaths");
-
-            entity.HasOne(d => d.Book).WithMany(p => p.BookPaths)
-                .HasForeignKey(d => d.BookId)
-                .HasConstraintName("FK_BooksBookPaths");
         });
 
         OnModelCreatingPartial(modelBuilder);

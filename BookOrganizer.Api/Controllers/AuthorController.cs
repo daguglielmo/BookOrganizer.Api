@@ -15,7 +15,6 @@ namespace BookOrganizer.Api.Controllers
     [Route("[controller]")]
     public class AuthorController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
         /// <summary>
         /// This API is for returning a list of all authors in the DB
         /// </summary>
@@ -23,7 +22,7 @@ namespace BookOrganizer.Api.Controllers
         [HttpGet(/*Name = "GetAuthor"*/)]
         public IEnumerable<Author> GetAll()
         {
-            using (var context = new AudiobookOrganizerContext(_configuration))
+            using (var context = new AudiobookOrganizerContext())
             {
                 return context.Authors.ToList();
             }

@@ -12,6 +12,4 @@ public partial class Author
     public string? AuthorName { get; set; }
 
     public string? AuthorImageId { get; set; }
-
-    public virtual ICollection<BookPath> BookPaths { get; set; } = new List<BookPath>();
 }

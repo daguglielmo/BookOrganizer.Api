@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BookOrganizer.Api.Models;
 
-public partial class Book
+public partial class BookDTO
 {
     public long OrganizerBookId { get; set; }
 
