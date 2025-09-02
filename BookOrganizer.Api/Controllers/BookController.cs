@@ -5,10 +5,17 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BookOrganizer.Api.Controllers
 {
+    /// <summary>
+    /// Basic CRUD operations for books in database
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
+        /// <summary>
+        /// Return all books in the database
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetAllBooks()
         {
@@ -23,6 +30,11 @@ namespace BookOrganizer.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a specific book from your library using the Audiobook Organizer internal ID
+        /// </summary>
+        /// <param name="id">Audiobook Organizer Internal ID</param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Book>> GetBook(long id)
         {
@@ -37,8 +49,14 @@ namespace BookOrganizer.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Edit the information held about a specific book
+        /// </summary>
+        /// <param name="id">Audiobook Organizer Internal ID</param>
+        /// <param name="book">Book with its altered data</param>
+        /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUpdateBook(long id, Book book)
+        public async Task<IActionResult> PutBook(long id, Book book)
         {
             if (id != book.OrganizerBookId)
             {
@@ -73,8 +91,14 @@ namespace BookOrganizer.Api.Controllers
                 return NoContent();
             }
         }
+
+        /// <summary>
+        /// Add a new book to the database
+        /// </summary>
+        /// <param name="book"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<Book>> PostAddBook(Book book)
+        public async Task<ActionResult<Book>> PostBook(Book book)
         {
             using (var _context = new AudiobookOrganizerContext())
             {
@@ -102,8 +126,13 @@ namespace BookOrganizer.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Remove a specific book
+        /// </summary>
+        /// <param name="id">Audiobook Organizer Internal ID</param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRemoveBook(long id)
+        public async Task<IActionResult> DeleteBook(long id)
         {
             using (var _context = new AudiobookOrganizerContext())
             {
@@ -118,6 +147,11 @@ namespace BookOrganizer.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Ensure that the specific book exists in the database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private bool BookExists(long id)
         {
             using (var _context = new AudiobookOrganizerContext())
@@ -126,6 +160,11 @@ namespace BookOrganizer.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// In case of future DTO
+        /// </summary>
+        /// <param name="book"></param>
+        /// <returns></returns>
         private static BookDTO BookToDTO(Book book) =>
             new BookDTO
             {
