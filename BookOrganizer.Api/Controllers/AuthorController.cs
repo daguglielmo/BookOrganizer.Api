@@ -8,26 +8,162 @@
  * ***************************************************************************/
 using BookOrganizer.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookOrganizer.Api.Controllers
 {
+    /// <summary>
+    /// Basic CRUD operations for authors in database
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class AuthorController : ControllerBase
     {
         /// <summary>
-        /// This API is for returning a list of all authors in the DB
+        /// Return a list of all authors in the database
         /// </summary>
         /// <returns>List of Authors</returns>
-        [HttpGet(/*Name = "GetAuthor"*/)]
-        public IEnumerable<Author> GetAll()
+        [HttpGet()]
+        public async Task<ActionResult<IEnumerable<Author>>> GetAllAuthors()
         {
-            using (var context = new AudiobookOrganizerContext())
+            using (var _context = new AudiobookOrganizerContext())
             {
-                return context.Authors.ToList();
+                var allAuthors = await _context.Authors.ToListAsync();
+                if (allAuthors == null || allAuthors.Count == 0)
+                {
+                    return NotFound();
+                }
+                return Ok(allAuthors);
             }
         }
 
-        
+        /// <summary>
+        /// Get a specific author from your library using the Audiobook Organizer internal ID
+        /// </summary>
+        /// <param name="id">Audiobook Organizer Internal ID</param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Author>> GetAuthor(long id)
+        {
+            using (var _context = new AudiobookOrganizerContext())
+            {
+                var author = await _context.Authors.FindAsync(id);
+                if (author == null)
+                {
+                    return NotFound();
+                }
+                return Ok(author);
+            }
+        }
+
+        /// <summary>
+        /// Edit the information held about a specific author
+        /// </summary>
+        /// <param name="id">Audiobook Organizer Internal ID</param>
+        /// <param name="author">author with its altered data</param>
+        /// <returns></returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAuthor(long id, Author author)
+        {
+            if (id != author.OrganizerAuthorId)
+            {
+                return BadRequest("Book ID doesn't match ID in request");
+            }
+            using (var _context = new AudiobookOrganizerContext())
+            {
+                var authorToUpdate = await _context.Authors.FindAsync(id);
+                if (authorToUpdate == null)
+                {
+                    return NotFound("Author record not found");
+                }
+                authorToUpdate.OrganizerAuthorId = id;
+                authorToUpdate.OpenLibraryAuthorId = author.OpenLibraryAuthorId;
+                authorToUpdate.AuthorName = author.AuthorName;
+                authorToUpdate.AuthorImageId = author.AuthorImageId;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException) when (!AuthorExists(id))
+                {
+                    return NotFound("ID not found");
+                }
+                return NoContent();
+            }
+        }
+
+        /// <summary>
+        /// Add a new author to the database
+        /// </summary>
+        /// <param name="author"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<ActionResult<Author>> PostAuthor(Author author)
+        {
+            using (var _context = new AudiobookOrganizerContext())
+            {
+                var newauthor = new Author
+                {
+                    OpenLibraryAuthorId = author.OpenLibraryAuthorId,
+                    AuthorName = author.AuthorName,
+                    AuthorImageId = author.AuthorImageId,
+                };
+                _context.Authors.Add(newauthor);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(
+                    nameof(GetAuthor),
+                    new { id = author.OrganizerAuthorId },
+                    AuthorToDTO(newauthor));
+            }
+        }
+
+        /// <summary>
+        /// Remove a specific author
+        /// </summary>
+        /// <param name="id">Audiobook Organizer Internal ID</param>
+        /// <returns></returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAuthor(long id)
+        {
+            using (var _context = new AudiobookOrganizerContext())
+            {
+                var author = await _context.Authors.FindAsync(id);
+                if (author == null)
+                {
+                    return NotFound();
+                }
+                _context.Authors.Remove(author);
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+        }
+
+        /// <summary>
+        /// Ensure that the specific author exists in the database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private bool AuthorExists(long id)
+        {
+            using (var _context = new AudiobookOrganizerContext())
+            {
+                return _context.Authors.Any(b => b.OrganizerAuthorId == id);
+            }
+        }
+
+        /// <summary>
+        /// In case of future DTO
+        /// </summary>
+        /// <param name="author"></param>
+        /// <returns></returns>
+        private static AuthorDTO AuthorToDTO(Author author) =>
+            new AuthorDTO
+            {
+                OpenLibraryAuthorId = author.OpenLibraryAuthorId,
+                AuthorName = author.AuthorName,
+                AuthorImageId = author.AuthorImageId
+            };
     }
 }
