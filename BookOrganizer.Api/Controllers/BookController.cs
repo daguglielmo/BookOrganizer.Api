@@ -17,7 +17,7 @@ namespace BookOrganizer.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetAllBooks()
+        public async Task<ActionResult<List<Book>>> GetAllBooks()
         {
             using (var _context = new AudiobookOrganizerContext())
             {

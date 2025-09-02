@@ -16,7 +16,7 @@ namespace BookOrganizer.Api.Controllers
     /// Basic CRUD operations for authors in database
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AuthorController : ControllerBase
     {
         /// <summary>
@@ -24,7 +24,7 @@ namespace BookOrganizer.Api.Controllers
         /// </summary>
         /// <returns>List of Authors</returns>
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<Author>>> GetAllAuthors()
+        public async Task<ActionResult<List<Author>>> GetAllAuthors()
         {
             using (var _context = new AudiobookOrganizerContext())
             {
