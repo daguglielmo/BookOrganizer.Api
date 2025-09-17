@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookOrganizer.Api.Models;
 
-public partial class AudiobookOrganizerContext : DbContext
+public partial class AudiobookOrganizerContext : DbContext, ILibraryContext
 {
     public AudiobookOrganizerContext()
     {
@@ -20,6 +20,11 @@ public partial class AudiobookOrganizerContext : DbContext
     public virtual DbSet<Book> Books { get; set; }
 
     public virtual DbSet<BookPath> BookPaths { get; set; }
+
+    public async Task<int> SaveChangesAsync()
+    {
+        return await base.SaveChangesAsync();
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -76,4 +81,5 @@ public partial class AudiobookOrganizerContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
 }

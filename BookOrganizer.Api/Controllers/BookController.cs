@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Creator:     Daniel Guglielmo
+ * Date:        08/27/2025
+ * Description: Book controller file created to allow the fetching of data 
+ *              from the Book table. 
+ * ***************************************************************************/
+
 using BookOrganizer.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +19,17 @@ namespace BookOrganizer.Api.Controllers
     [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
+        private readonly ILibraryContext _context;
+
+        /// <summary>
+        /// Configure the context 
+        /// </summary>
+        /// <param name="context"></param>
+        public BookController(AudiobookOrganizerContext context)
+        {
+            _context = context;
+        }
+
         /// <summary>
         /// Return all books in the database
         /// </summary>
@@ -19,15 +37,12 @@ namespace BookOrganizer.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Book>>> GetAllBooks()
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var allBooks = await _context.Books.ToListAsync();
+            if (allBooks == null || allBooks.Count == 0)
             {
-                var allBooks = await _context.Books.ToListAsync();
-                if (allBooks == null || allBooks.Count == 0)
-                {
-                    return NotFound();
-                }
-                return Ok(allBooks);
+                return NotFound();
             }
+            return Ok(allBooks);
         }
 
         /// <summary>
@@ -38,15 +53,12 @@ namespace BookOrganizer.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Book>> GetBook(long id)
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
             {
-                var book = await _context.Books.FindAsync(id);
-                if (book == null)
-                {
-                    return NotFound();
-                }
-                return Ok(book);
+                return NotFound();
             }
+            return Ok(book);
         }
 
         /// <summary>
@@ -62,34 +74,32 @@ namespace BookOrganizer.Api.Controllers
             {
                 return BadRequest("Book ID doesn't match ID in request");
             }
-            using (var _context = new AudiobookOrganizerContext())
-            {
-                var bookToUpdate = await _context.Books.FindAsync(id);
-                if (bookToUpdate == null)
-                {
-                    return NotFound("Book record not found");
-                }
-                bookToUpdate.Asin = book.Asin;
-                bookToUpdate.AuthorKey = book.AuthorKey;
-                bookToUpdate.CoverId = book.CoverId;
-                bookToUpdate.FirstPublishYear = book.FirstPublishYear;
-                bookToUpdate.OpenLibraryBookId = book.OpenLibraryBookId;
-                bookToUpdate.OpenLibraryWorksLink = book.OpenLibraryWorksLink;
-                bookToUpdate.PublishDate = book.PublishDate;
-                bookToUpdate.Publisher = book.Publisher;
-                bookToUpdate.SeriesName = book.SeriesName;
-                bookToUpdate.Title = book.Title;
 
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException) when (!BookExists(id))
-                {
-                    return NotFound("ID not found");
-                }
-                return NoContent();
+            var bookToUpdate = await _context.Books.FindAsync(id);
+            if (bookToUpdate == null)
+            {
+                return NotFound("Book record not found");
             }
+            bookToUpdate.Asin = book.Asin;
+            bookToUpdate.AuthorKey = book.AuthorKey;
+            bookToUpdate.CoverId = book.CoverId;
+            bookToUpdate.FirstPublishYear = book.FirstPublishYear;
+            bookToUpdate.OpenLibraryBookId = book.OpenLibraryBookId;
+            bookToUpdate.OpenLibraryWorksLink = book.OpenLibraryWorksLink;
+            bookToUpdate.PublishDate = book.PublishDate;
+            bookToUpdate.Publisher = book.Publisher;
+            bookToUpdate.SeriesName = book.SeriesName;
+            bookToUpdate.Title = book.Title;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException) when (!BookExists(id))
+            {
+                return NotFound("ID not found");
+            }
+            return NoContent();
         }
 
         /// <summary>
@@ -100,30 +110,26 @@ namespace BookOrganizer.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Book>> PostBook(Book book)
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var newBook = new Book
             {
-                var newBook = new Book
-                {
+                Asin = book.Asin,
+                AuthorKey = book.AuthorKey,
+                CoverId = book.CoverId,
+                FirstPublishYear = book.FirstPublishYear,
+                OpenLibraryBookId = book.OpenLibraryBookId,
+                OpenLibraryWorksLink = book.OpenLibraryWorksLink,
+                PublishDate = book.PublishDate,
+                Publisher = book.Publisher,
+                SeriesName = book.SeriesName,
+                Title = book.Title
+            };
+            _context.Books.Add(newBook);
+            await _context.SaveChangesAsync();
 
-                    Asin = book.Asin,
-                    AuthorKey = book.AuthorKey,
-                    CoverId = book.CoverId,
-                    FirstPublishYear = book.FirstPublishYear,
-                    OpenLibraryBookId = book.OpenLibraryBookId,
-                    OpenLibraryWorksLink = book.OpenLibraryWorksLink,
-                    PublishDate = book.PublishDate,
-                    Publisher = book.Publisher,
-                    SeriesName = book.SeriesName,
-                    Title = book.Title,
-                };
-                _context.Books.Add(newBook);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction(
-                    nameof(GetBook),
-                    new { id = book.OrganizerBookId },
-                    BookToDTO(newBook));
-            }
+            return CreatedAtAction(
+                nameof(GetBook),
+                new { id = book.OrganizerBookId },
+                BookToDTO(newBook));
         }
 
         /// <summary>
@@ -134,17 +140,14 @@ namespace BookOrganizer.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(long id)
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
             {
-                var book = await _context.Books.FindAsync(id);
-                if (book == null)
-                {
-                    return NotFound();
-                }
-                _context.Books.Remove(book);
-                await _context.SaveChangesAsync();
-                return NoContent();
+                return NotFound();
             }
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         /// <summary>
@@ -154,10 +157,7 @@ namespace BookOrganizer.Api.Controllers
         /// <returns></returns>
         private bool BookExists(long id)
         {
-            using (var _context = new AudiobookOrganizerContext())
-            {
-                return _context.Books.Any(b => b.OrganizerBookId == id);
-            }
+            return _context.Books.Any(b => b.OrganizerBookId == id);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace BookOrganizer.Api.Controllers
                 PublishDate = book.PublishDate,
                 Publisher = book.Publisher,
                 SeriesName = book.SeriesName,
-                Title = book.Title,
+                Title = book.Title
             };
     }
 

@@ -6,6 +6,7 @@
  *              with C# and .NET" Chapter 4 to allow for the 
  *              translation of comments into info on swagger page
  * ***************************************************************************/
+
 using BookOrganizer.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,17 @@ namespace BookOrganizer.Api.Controllers
     [Route("api/[controller]")]
     public class AuthorController : ControllerBase
     {
+        private readonly ILibraryContext _context;
+
+        /// <summary>
+        /// Configure the context 
+        /// </summary>
+        /// <param name="context"></param>
+        public AuthorController(AudiobookOrganizerContext context)
+        {
+            _context = context;
+        }
+
         /// <summary>
         /// Return a list of all authors in the database
         /// </summary>
@@ -26,15 +38,12 @@ namespace BookOrganizer.Api.Controllers
         [HttpGet()]
         public async Task<ActionResult<List<Author>>> GetAllAuthors()
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var allAuthors = await _context.Authors.ToListAsync();
+            if (allAuthors == null || allAuthors.Count == 0)
             {
-                var allAuthors = await _context.Authors.ToListAsync();
-                if (allAuthors == null || allAuthors.Count == 0)
-                {
-                    return NotFound();
-                }
-                return Ok(allAuthors);
+                return NotFound();
             }
+            return Ok(allAuthors);
         }
 
         /// <summary>
@@ -45,15 +54,12 @@ namespace BookOrganizer.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Author>> GetAuthor(long id)
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var author = await _context.Authors.FindAsync(id);
+            if (author == null)
             {
-                var author = await _context.Authors.FindAsync(id);
-                if (author == null)
-                {
-                    return NotFound();
-                }
-                return Ok(author);
+                return NotFound();
             }
+            return Ok(author);
         }
 
         /// <summary>
@@ -69,28 +75,27 @@ namespace BookOrganizer.Api.Controllers
             {
                 return BadRequest("Book ID doesn't match ID in request");
             }
-            using (var _context = new AudiobookOrganizerContext())
-            {
-                var authorToUpdate = await _context.Authors.FindAsync(id);
-                if (authorToUpdate == null)
-                {
-                    return NotFound("Author record not found");
-                }
-                authorToUpdate.OrganizerAuthorId = id;
-                authorToUpdate.OpenLibraryAuthorId = author.OpenLibraryAuthorId;
-                authorToUpdate.AuthorName = author.AuthorName;
-                authorToUpdate.AuthorImageId = author.AuthorImageId;
 
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException) when (!AuthorExists(id))
-                {
-                    return NotFound("ID not found");
-                }
-                return NoContent();
+            var authorToUpdate = await _context.Authors.FindAsync(id);
+            if (authorToUpdate == null)
+            {
+                return NotFound("Author record not found");
             }
+
+            authorToUpdate.OrganizerAuthorId = id;
+            authorToUpdate.OpenLibraryAuthorId = author.OpenLibraryAuthorId;
+            authorToUpdate.AuthorName = author.AuthorName;
+            authorToUpdate.AuthorImageId = author.AuthorImageId;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException) when (!AuthorExists(id))
+            {
+                return NotFound("ID not found");
+            }
+            return NoContent();
         }
 
         /// <summary>
@@ -101,22 +106,19 @@ namespace BookOrganizer.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Author>> PostAuthor(Author author)
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var newauthor = new Author
             {
-                var newauthor = new Author
-                {
-                    OpenLibraryAuthorId = author.OpenLibraryAuthorId,
-                    AuthorName = author.AuthorName,
-                    AuthorImageId = author.AuthorImageId,
-                };
-                _context.Authors.Add(newauthor);
-                await _context.SaveChangesAsync();
+                OpenLibraryAuthorId = author.OpenLibraryAuthorId,
+                AuthorName = author.AuthorName,
+                AuthorImageId = author.AuthorImageId,
+            };
+            _context.Authors.Add(newauthor);
+            await _context.SaveChangesAsync();
 
-                return CreatedAtAction(
-                    nameof(GetAuthor),
-                    new { id = author.OrganizerAuthorId },
-                    AuthorToDTO(newauthor));
-            }
+            return CreatedAtAction(
+                nameof(GetAuthor),
+                new { id = author.OrganizerAuthorId },
+                AuthorToDTO(newauthor));
         }
 
         /// <summary>
@@ -127,17 +129,14 @@ namespace BookOrganizer.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(long id)
         {
-            using (var _context = new AudiobookOrganizerContext())
+            var author = await _context.Authors.FindAsync(id);
+            if (author == null)
             {
-                var author = await _context.Authors.FindAsync(id);
-                if (author == null)
-                {
-                    return NotFound();
-                }
-                _context.Authors.Remove(author);
-                await _context.SaveChangesAsync();
-                return NoContent();
+                return NotFound();
             }
+            _context.Authors.Remove(author);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         /// <summary>
@@ -147,10 +146,7 @@ namespace BookOrganizer.Api.Controllers
         /// <returns></returns>
         private bool AuthorExists(long id)
         {
-            using (var _context = new AudiobookOrganizerContext())
-            {
-                return _context.Authors.Any(b => b.OrganizerAuthorId == id);
-            }
+            return _context.Authors.Any(b => b.OrganizerAuthorId == id);
         }
 
         /// <summary>
