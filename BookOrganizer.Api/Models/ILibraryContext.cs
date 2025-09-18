@@ -6,6 +6,7 @@ namespace BookOrganizer.Api.Models
     {
         DbSet<Author> Authors { get; set; }
         DbSet<Book> Books { get; set; }
+        DbSet<BookPath> BookPaths { get; set; }
         Task<int> SaveChangesAsync();
     }
 }

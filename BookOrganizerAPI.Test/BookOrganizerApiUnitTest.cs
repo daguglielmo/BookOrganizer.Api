@@ -148,6 +148,7 @@ namespace BookOrganizerAPI.Test
         }
         #endregion
 
+        #region Context Tests
         [Fact]
         public void OneBookInDatabaseTest()
         {
@@ -273,5 +274,6 @@ namespace BookOrganizerAPI.Test
             );
 
         }
+        #endregion
     }
 }

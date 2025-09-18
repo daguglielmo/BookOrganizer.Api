@@ -68,7 +68,7 @@ namespace BookOrganizer.Api.Controllers
         /// <param name="book">Book with its altered data</param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBook(long id, Book book)
+        public async Task<IActionResult> UpdateBook(long id, Book book)
         {
             if (id != book.OrganizerBookId)
             {
@@ -95,9 +95,17 @@ namespace BookOrganizer.Api.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException) when (!BookExists(id))
+            catch (DbUpdateConcurrencyException) //when (!BookExists(id))
             {
-                return NotFound("ID not found");
+                if (!BookExists(id))
+                {
+                    return NotFound("ID not found");
+                }
+                else
+                {
+                    throw;
+                }
+                
             }
             return NoContent();
         }
@@ -108,7 +116,7 @@ namespace BookOrganizer.Api.Controllers
         /// <param name="book"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<Book>> PostBook(Book book)
+        public async Task<ActionResult<Book>> CreateBook(Book book)
         {
             var newBook = new Book
             {
