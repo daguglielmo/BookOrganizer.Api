@@ -3,4 +3,6 @@
 GET {{BookOrganizer.Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
+GET {{BookOrganizer.Api_HostAddress}}/api/book/
+Accept: application/json
 ###

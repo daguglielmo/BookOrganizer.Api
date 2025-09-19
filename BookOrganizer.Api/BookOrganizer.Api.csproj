@@ -22,4 +22,8 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.7.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="BookOrganizerAPI.Test"/>
+  </ItemGroup>
+
 </Project>

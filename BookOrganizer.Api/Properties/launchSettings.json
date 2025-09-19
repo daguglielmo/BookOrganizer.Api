@@ -10,7 +10,10 @@
     },
     "https": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
+      //"launchBrowser": true,
+      //"launchUrl": "scalar",
+      //"applicationUrl": "https://localhost:{ServicePort}/scalar",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -19,8 +22,7 @@
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
-      //"launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
-      "launchUrl": "scalar",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "8081",
         "ASPNETCORE_HTTP_PORTS": "8080"

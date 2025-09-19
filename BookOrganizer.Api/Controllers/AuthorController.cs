@@ -26,9 +26,9 @@ namespace BookOrganizer.Api.Controllers
         /// Configure the context 
         /// </summary>
         /// <param name="context"></param>
-        public AuthorController(AudiobookOrganizerContext context)
+        public AuthorController()
         {
-            _context = context;
+            _context = new AudiobookOrganizerContext();
         }
 
         /// <summary>

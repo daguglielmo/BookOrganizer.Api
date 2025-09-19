@@ -19,9 +19,14 @@ namespace BookOrganizer.Api.Controllers
     /// <param name="context"></param>
     [ApiController]
     [Route("api/[controller]")]
-    public class BookPathController(AudiobookOrganizerContext context) : ControllerBase
+    public class BookPathController : ControllerBase
     {
-        private readonly AudiobookOrganizerContext _context = context;
+        private readonly AudiobookOrganizerContext _context;
+
+        public BookPathController()
+        {
+            _context = new AudiobookOrganizerContext();
+        }
 
         /// <summary>
         /// Return all book paths in the database

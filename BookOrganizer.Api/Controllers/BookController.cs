@@ -20,14 +20,14 @@ namespace BookOrganizer.Api.Controllers
     public class BookController : ControllerBase
     {
         private readonly ILibraryContext _context;
-
         /// <summary>
         /// Configure the context 
         /// </summary>
         /// <param name="context"></param>
-        public BookController(AudiobookOrganizerContext context)
+        //public BookController(AudiobookOrganizerContext context)
+        public BookController()
         {
-            _context = context;
+            _context = new AudiobookOrganizerContext();
         }
 
         /// <summary>
@@ -37,12 +37,15 @@ namespace BookOrganizer.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Book>>> GetAllBooks()
         {
-            var allBooks = await _context.Books.ToListAsync();
-            if (allBooks == null || allBooks.Count == 0)
-            {
-                return NotFound();
-            }
-            return Ok(allBooks);
+            //using (var context = new AudiobookOrganizerContext())
+            //{
+                var allBooks = await _context.Books.ToListAsync();
+                if (allBooks == null || allBooks.Count == 0)
+                {
+                    return NotFound();
+                }
+                return Ok(allBooks);
+            //}
         }
 
         /// <summary>
